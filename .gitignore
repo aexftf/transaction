@@ -1,0 +1,6 @@
+# Project exclude paths
+/rubbish-auth/target/
+/rubbish-common/target/
+/rubbish-gateway/target/
+/rubbish-order/target/
+/rubbish-user/target/

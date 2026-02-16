@@ -1,0 +1,195 @@
+version: '3.8'
+
+services:
+  # MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: rubbish-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Asia/Shanghai
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    networks:
+      - rubbish-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: rubbish-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - rubbish-network
+
+  # Nacos
+  nacos:
+    image: nacos/nacos-server:v2.2.0
+    container_name: rubbish-nacos
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: root
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      JVM_XMS: 512m
+      JVM_XMX: 512m
+    depends_on:
+      - mysql
+    networks:
+      - rubbish-network
+
+  # Sentinel Dashboard
+  sentinel:
+    image: bladex/sentinel-dashboard:1.8.6
+    container_name: rubbish-sentinel
+    ports:
+      - "8858:8858"
+    networks:
+      - rubbish-network
+
+  # Seata Server
+  seata-server:
+    image: seataio/seata-server:1.5.2
+    container_name: rubbish-seata
+    ports:
+      - "8091:8091"
+      - "7091:7091"
+    environment:
+      SEATA_PORT: 8091
+      STORE_MODE: db
+      SEATA_CONFIG_NAME: file:/root/seata-config/registry
+    volumes:
+      - ./seata/config:/root/seata-config
+    depends_on:
+      - mysql
+      - nacos
+    networks:
+      - rubbish-network
+
+  # RocketMQ NameServer
+  rocketmq-namesrv:
+    image: apache/rocketmq:4.9.4
+    container_name: rubbish-rocketmq-namesrv
+    ports:
+      - "9876:9876"
+    environment:
+      JAVA_OPT_EXT: "-Xms512M -Xmx512M"
+    command: sh mqnamesrv
+    networks:
+      - rubbish-network
+
+  # RocketMQ Broker
+  rocketmq-broker:
+    image: apache/rocketmq:4.9.4
+    container_name: rubbish-rocketmq-broker
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+    environment:
+      NAMESRV_ADDR: "rocketmq-namesrv:9876"
+      JAVA_OPT_EXT: "-Xms512M -Xmx512M"
+    command: sh mqbroker -c /opt/rocketmq-4.9.4/conf/broker.conf
+    depends_on:
+      - rocketmq-namesrv
+    volumes:
+      - ./rocketmq/broker.conf:/opt/rocketmq-4.9.4/conf/broker.conf
+    networks:
+      - rubbish-network
+
+  # RocketMQ Console
+  rocketmq-console:
+    image: styletang/rocketmq-console-ng:latest
+    container_name: rubbish-rocketmq-console
+    ports:
+      - "8180:8080"
+    environment:
+      JAVA_OPTS: "-Drocketmq.namesrv.addr=rocketmq-namesrv:9876 -Xms256M -Xmx256M"
+    depends_on:
+      - rocketmq-namesrv
+    networks:
+      - rubbish-network
+
+  # Zipkin
+  zipkin:
+    image: openzipkin/zipkin:2.24
+    container_name: rubbish-zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      STORAGE_TYPE: elasticsearch
+      ES_HOSTS: elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - rubbish-network
+
+  # Elasticsearch
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    container_name: rubbish-elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - rubbish-network
+
+  # SkyWalking OAP
+  skywalking-oap:
+    image: apache/skywalking-oap-server:8.12.0-es7
+    container_name: rubbish-skywalking-oap
+    ports:
+      - "11800:11800"
+      - "12800:12800"
+    environment:
+      SW_STORAGE: elasticsearch7
+      SW_ES_ADDRESSES: elasticsearch:9200
+      SW_STORAGE_ES_BUCKET_SIZE: 2000
+      SW_HEALTH_CHECKER: default
+    depends_on:
+      - elasticsearch
+    networks:
+      - rubbish-network
+
+  # SkyWalking UI
+  skywalking-ui:
+    image: apache/skywalking-ui:8.12.0
+    container_name: rubbish-skywalking-ui
+    ports:
+      - "8088:8080"
+    environment:
+      SW_OAP_ADDRESS: skywalking-oap:12800
+    depends_on:
+      - skywalking-oap
+    networks:
+      - rubbish-network
+
+
+volumes:
+  mysql-data:
+  redis-data:
+  es-data:
+
+networks:
+  rubbish-network:
+    driver: bridge
