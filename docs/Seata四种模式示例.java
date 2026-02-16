@@ -275,7 +275,7 @@ class SAGA_Mode_Example {
         // 补偿步骤2：退票
         refundTicket(userId, flightNo);
 
-        // 补偿步骤1：退款
+        // 补偿步骤1：退款1
         refundPayment(userId, 1000);
     }
 
