@@ -58,6 +58,12 @@
             <artifactId>jjwt</artifactId>
         </dependency>
 
+        <!-- Spring Boot AOP -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- FastJson -->
         <dependency>
             <groupId>com.alibaba</groupId>

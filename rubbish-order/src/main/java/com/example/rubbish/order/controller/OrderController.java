@@ -1,5 +1,6 @@
 package com.example.rubbish.order.controller;
 
+import com.example.rubbish.common.annotations.OperationLog;
 import com.example.rubbish.common.result.Result;
 import com.example.rubbish.order.dto.OrderDTO;
 import com.example.rubbish.order.entity.Order;
@@ -23,21 +24,25 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
+    @OperationLog(module = "订单管理", description = "创建订单")
     public Result<String> create(@Valid @RequestBody OrderDTO dto) {
         return Result.success(orderService.createOrder(dto));
     }
 
     @GetMapping("/{orderNo}")
+    @OperationLog(module = "订单管理", description = "查询订单详情")
     public Result<Order> getByOrderNo(@PathVariable String orderNo) {
         return Result.success(orderService.getByOrderNo(orderNo));
     }
 
     @PostMapping("/{orderNo}/cancel")
+    @OperationLog(module = "订单管理", description = "取消订单")
     public Result<Boolean> cancel(@PathVariable String orderNo) {
         return Result.success(orderService.cancelOrder(orderNo));
     }
 
     @GetMapping("/user/{userId}")
+    @OperationLog(module = "订单管理", description = "查询用户订单列表")
     public Result<List<OrderVO>> listByUserId(@PathVariable Long userId) {
         log.info("查询用户订单列表，用户ID：{}", userId);
         return Result.success(orderService.listByUserId(userId));
