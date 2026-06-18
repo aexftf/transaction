@@ -41,7 +41,6 @@
         <jwt.version>0.9.1</jwt.version>
         <fastjson.version>1.2.83</fastjson.version>
         <seata.version>1.5.2</seata.version>
-        <rocketmq.version>2.2.3</rocketmq.version>
         <sentinel.version>1.8.6</sentinel.version>
         <skywalking.version>8.12.0</skywalking.version>
         <swagger.version>3.0.0</swagger.version>
@@ -123,13 +122,6 @@
                 <version>${seata.version}</version>
             </dependency>
 
-            <!-- RocketMQ -->
-            <dependency>
-                <groupId>org.apache.rocketmq</groupId>
-                <artifactId>rocketmq-spring-boot-starter</artifactId>
-                <version>${rocketmq.version}</version>
-            </dependency>
-
             <!-- Sentinel Datasource Nacos -->
             <dependency>
                 <groupId>com.alibaba.csp</groupId>
@@ -152,6 +144,31 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

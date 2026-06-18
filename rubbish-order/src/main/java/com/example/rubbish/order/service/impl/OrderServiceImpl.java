@@ -62,8 +62,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         log.info("订单创建成功，订单号：{}", order.getOrderNo());
 
-        // 发送订单创建消息到 RocketMQ
-        // rocketMQTemplate.convertAndSend("order-topic", order);
+        // 发送订单创建消息到 RabbitMQ
+        // rabbitTemplate.convertAndSend(RabbitMqConfig.ORDER_EXCHANGE, RabbitMqConfig.ORDER_CREATED_ROUTING_KEY, order);
 
         return order.getOrderNo();
     }

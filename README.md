@@ -24,7 +24,7 @@
 - Seata 1.5.2 - AT 模式分布式事务
 
 ### 消息队列
-- RocketMQ 4.9.4 - 异步消息、解耦
+- RabbitMQ 3.12 - 异步消息、解耦
 
 ### 持久化
 - MyBatis Plus 3.5.3.1
@@ -83,7 +83,6 @@ rubbish-cloud/
 │
 ├── sql/                   # 数据库脚本
 ├── seata/                 # Seata 配置
-├── rocketmq/              # RocketMQ 配置
 └── docker-compose.yml     # Docker Compose 编排文件
 ```
 
@@ -113,7 +112,7 @@ docker-compose logs -f
 服务访问地址：
 - Nacos: http://localhost:8848/nacos (nacos/nacos)
 - Sentinel: http://localhost:8858 (sentinel/sentinel)
-- RocketMQ Console: http://localhost:8180
+- RabbitMQ Management: http://localhost:15672 (guest/guest)
 - Zipkin: http://localhost:9411
 - SkyWalking UI: http://localhost:8088
 
@@ -276,9 +275,9 @@ kubectl apply -f k8s/
 - 检查 `undo_log` 表是否存在
 - 确认 Seata Server 连接正常
 
-### 3. RocketMQ 消息发送失败
-- 检查 NameServer 连接
-- 确认 Topic 已创建
+### 3. RabbitMQ 消息发送失败
+- 检查 RabbitMQ 连接
+- 确认 Exchange、Queue 和 Binding 已创建
 
 ## 联系方式
 

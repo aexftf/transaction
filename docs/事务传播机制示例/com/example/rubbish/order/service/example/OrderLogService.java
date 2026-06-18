@@ -1,6 +1,7 @@
 package com.example.rubbish.order.service.example;
 
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
  * - 发送通知/消息
  * - 无论主业务成功失败，这些操作都要保留
  */
-@Slf4j
 @Service
 public class OrderLogService {
+
+    private static final Log log = LogFactory.getLog(OrderLogService.class);
 
     /**
      * REQUIRES_NEW: 总是新建独立事务
@@ -31,7 +33,7 @@ public class OrderLogService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void saveLogWithRequiresNew(String message) {
-        log.info("[REQUIRES_NEW] 保存日志: {}", message);
+        log.info("[REQUIRES_NEW] 保存日志: " + message);
         // INSERT INTO order_log (message, create_time) VALUES (?, NOW())
 
         // 即使外部事务回滚，这条日志也不会回滚
@@ -50,7 +52,7 @@ public class OrderLogService {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void saveLogWithRequired(String message) {
-        log.info("[REQUIRED] 保存日志: {}", message);
+        log.info("[REQUIRED] 保存日志: " + message);
         // 和外部方法在同一个事务中，同生共死
     }
 }

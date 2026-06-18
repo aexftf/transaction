@@ -1,8 +1,9 @@
 package com.example.rubbish.order.service.example;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -12,13 +13,18 @@ import java.util.List;
  *
  * 演示 REQUIRED、REQUIRES_NEW、NESTED 三种常用传播行为的区别
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class TransactionPropagationExample {
+
+    private static final Log log = LogFactory.getLog(TransactionPropagationExample.class);
 
     private final OrderLogService orderLogService;
     private final OrderItemService orderItemService;
+
+    public TransactionPropagationExample(OrderLogService orderLogService, OrderItemService orderItemService) {
+        this.orderLogService = orderLogService;
+        this.orderItemService = orderItemService;
+    }
 
     /**
      * 场景1: REQUIRED（默认）
@@ -26,7 +32,7 @@ public class TransactionPropagationExample {
      * 内部方法和外部方法在同一个事务中
      * 任一方法失败，全部回滚
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void requiredExample() {
         log.info("=== REQUIRED 示例 ===");
 
@@ -46,7 +52,7 @@ public class TransactionPropagationExample {
      * 内部方法总是新建独立事务
      * 即使外部事务失败，内部已提交的操作不会回滚
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void requiresNewExample() {
         log.info("=== REQUIRES_NEW 示例 ===");
 
@@ -67,7 +73,7 @@ public class TransactionPropagationExample {
      * - 内部失败：只回滚内部，外部继续
      * - 外部失败：内部也一起回滚
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void nestedExample(List<String> itemNames) {
         log.info("=== NESTED 示例：批量创建订单明细 ===");
 
@@ -83,13 +89,13 @@ public class TransactionPropagationExample {
                 orderItemService.createItemWithNested(itemName);
                 success++;
             } catch (Exception e) {
-                log.warn("创建明细失败: {}, 错误: {}", itemName, e.getMessage());
+                log.warn("创建明细失败: " + itemName + ", 错误: " + e.getMessage());
                 fail++;
                 // catch 住异常，继续处理下一个
             }
         }
 
-        log.info("批量处理完成，成功: {}, 失败: {}", success, fail);
+        log.info("批量处理完成，成功: " + success + ", 失败: " + fail);
 
         // 如果这里抛异常，所有已成功的 NESTED 子事务也会回滚
         // throw new RuntimeException("模拟外部事务失败");
@@ -100,7 +106,7 @@ public class TransactionPropagationExample {
      *
      * 实际业务中常见：REQUIRES_NEW 用于日志，NESTED 用于批量处理
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void mixedExample(List<String> itemNames) {
         log.info("=== 混合使用示例 ===");
 
@@ -116,7 +122,7 @@ public class TransactionPropagationExample {
                 try {
                     orderItemService.createItemWithNested(itemName);
                 } catch (Exception e) {
-                    log.warn("明细创建失败: {}", itemName);
+                    log.warn("明细创建失败: " + itemName);
                 }
             }
 

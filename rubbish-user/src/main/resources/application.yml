@@ -81,13 +81,13 @@ spring:
         max-wait: 2000ms
     timeout: 5000ms
 
-  # RocketMQ配置
-  rocketmq:
-    name-server: 127.0.0.1:9876
-    producer:
-      group: user-producer-group
-      send-message-timeout: 3000
-      retry-times-when-send-failed: 2
+  # RabbitMQ配置
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
 
 # Seata配置
 seata:

@@ -1,6 +1,7 @@
 package com.example.rubbish.order.service.example;
 
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,9 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 订单明细服务 - 演示 NESTED 和 REQUIRED
  */
-@Slf4j
 @Service
 public class OrderItemService {
+
+    private static final Log log = LogFactory.getLog(OrderItemService.class);
 
     /**
      * REQUIRED: 默认行为，加入外部事务
@@ -24,7 +26,7 @@ public class OrderItemService {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void createItemWithRequired(String itemName) {
-        log.info("[REQUIRED] 创建明细: {}", itemName);
+        log.info("[REQUIRED] 创建明细: " + itemName);
         // INSERT INTO order_item (item_name) VALUES (?)
 
         // 和外部方法在同一个事务中，同生共死
@@ -47,7 +49,7 @@ public class OrderItemService {
      */
     @Transactional(propagation = Propagation.NESTED, rollbackFor = Exception.class)
     public void createItemWithNested(String itemName) {
-        log.info("[NESTED] 创建明细: {}", itemName);
+        log.info("[NESTED] 创建明细: " + itemName);
         // INSERT INTO order_item (item_name) VALUES (?)
 
         // 模拟某些明细创建失败
@@ -73,7 +75,7 @@ public class OrderItemService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void createItemWithRequiresNew(String itemName) {
-        log.info("[REQUIRES_NEW] 创建明细: {}", itemName);
+        log.info("[REQUIRES_NEW] 创建明细: " + itemName);
         // INSERT INTO order_item (item_name) VALUES (?)
 
         // 完全独立的事务，不受外部影响
